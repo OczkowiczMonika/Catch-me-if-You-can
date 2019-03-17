@@ -1,113 +1,218 @@
-<!doctype html>
+let uluru, map, marker, ws, nick
 
-<html lang="pl-PL">
+let players = []
 
-    <head>
+
+
+
+
+function initMap() {
+
+
+
+    uluru = {
+
+        lat: 50.073, 
+
+        lng: 20.029
+
+    };
+
+
+
+    map = new google.maps.Map(
+
+      document.getElementById('root'), {
+
+          zoom: 4, 
+
+          center: uluru
+
+        });
+
+
+
+    marker = new google.maps.Marker({ 
+
+        position: uluru, 
+
+        map: map,
+
+        icon: 'Sports-Exercise-icon.png'
+
+    });
+
+
+
+    getPlayerLocalization()
+
+    window.addEventListener( 'keydown', moveMarker )
+
+    startWebSocket()
+
+}
+
+
+
+function moveMarker ( event ) {
+
+
+
+    let lat = marker.getPosition().lat()
+
+    let lng = marker.getPosition().lng()
+
+
+
+    switch ( event.code ) {
+
+        case 'ArrowUp':
+
+            lat += 0.1
+
+            break;
+
+        case 'ArrowDown':
+
+            lat -= 0.1
+
+            break;
+
+        case 'ArrowLeft':
+
+            lng -= 0.1
+
+            break;
+
+        case 'ArrowRight':
+
+            lng += 0.1
+
+            break;
+
+    }
+
+
+
+    let position = {
+
+        lat,
+
+        lng
+
+    }
+
+
+
+
+    map.setCenter( position )
+
+    marker.setPosition( position )
 
     
 
-        <meta charset="UTF-8">
 
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+}
 
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-        
 
-        <title></title>
+function getPlayerLocalization(){
 
+    navigator.geolocation.getCurrentPosition( localizationPermitted, localizationDenied )
 
+}
 
-        <link rel="Stylesheet" href="style.css">
 
 
+function localizationPermitted( event ){
 
-        <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
 
 
+    currentPosition = {
 
-    </head>
+        lat: event.coords.latitude,
 
+        lng: event.coords.longitude
 
+    };
 
-    <body>
 
 
+    map.setCenter( currentPosition )
 
-        <div id = "root"></div>
+    marker.setPosition( currentPosition )
 
 
 
-        <div class = "container" >
+    document.querySelector('#localization').disabled = true;
 
 
 
-            <div id = "menu" >
+    setNickname()
 
 
 
-                <button id = "localization" >Obecna lokalizacja</button>
+}
 
-                <button >Wyślij wiadomość</button>
 
-                
 
-            </div>
+function localizationDenied( event ){
 
 
 
-            <div id = "chat" >
+    alert('Odmówiono lokalizacji. Domyślnie ustawiona lokalizacja to: Kraków. Jeśli chcesz podać poprawną lokalizację, kliknij przycisk OBECNA LOKALIZACJA')
 
 
 
-                <div id = "info" >
+    setNickname()
 
 
 
-                    <article id = "nickname" ></article>
+}
 
 
 
-                </div>
+function setNickname() {
 
+    
 
+    let response
 
-                <div id = "data" >
 
 
+    do( response = prompt("Podaj swój nick ( nie może być pusty )"))
 
-                    <div class = "flex-wrapp">
 
 
+    while( response == null || response == "" )
 
-                        <article>CZAT</article>
 
 
+    nick = response
 
-                    </div>
 
 
+    document.querySelector("#nickname").innerText = `Twój nick: ${response}`
 
-                </div>
 
 
+}
 
-            </div>
 
 
+function startWebSocket() {
 
-        </div>
 
 
+    let url = 'ws://91.121.66.175:8010'
 
-        <script src = "scripts.js" ></script>
 
 
+    ws = new WebSocket(url)
 
-        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBHxgf4R6TyF5O-RbGeKzEXVPZRQVGhFto&callback=initMap"
+  
 
-        type="text/javascript"></script>
 
 
+}
 
-    </body>
